@@ -1,6 +1,6 @@
-## compiler
+## Compiler
 
-#Tasks
+# Tasks
 
 1. Syntax diagrams
 2. Write expression translator
