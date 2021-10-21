@@ -1,38 +1,5 @@
-struct GraphStepper<'a> {
-    transitions: &'a [(usize, char, usize)],
-    finite_info: &'a [bool],
-    current_vertex : usize,
-}
-impl<'a> GraphStepper<'a> {
-    fn new(transitions: &'a [(usize, char, usize)], finite_info: &'a [bool] ) 
-        -> std::result::Result<Self, &'static str> {
-
-        // Checking graph
-        if !finite_info.iter().any(|&f| { f == true }) {
-            return Err("Graph has not any finite vertex");
-        }
-
-        Ok( Self { transitions, finite_info, current_vertex: 0 } )
-    }
-    fn step(&mut self, symbol: char) -> bool 
-    {
-        let transition = self.transitions.iter()
-        .find(|x| { &&x.0 == &&self.current_vertex && &&x.1 == &&symbol });
-
-        if let None = transition {
-            return false;
-        }
-
-        let transition = transition.unwrap();
-
-        self.current_vertex = transition.2; // next vertex
-
-        true
-    }
-    fn is_complete(&self) -> bool {
-        self.finite_info[self.current_vertex]
-    }
-}
+mod dfa;
+use dfa::DFA;
 
 fn main() {
     let transitions  = 
@@ -85,7 +52,7 @@ fn main() {
     });
 
 
-    let mut stepper = GraphStepper::new(&transitions, &[false, false, true]).unwrap();
+    let mut stepper = DFA::new(&transitions, &[false, false, true]).unwrap();
 
     for ch in chain.chars() {
         if stepper.step(ch) == false {
