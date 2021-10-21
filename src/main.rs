@@ -1,71 +1,65 @@
-mod dfa;
-use dfa::DFA;
+const DIGITS: [char;10] = ['0','1','2','3','4','5','6','7','8','9'];
+
+pub struct SyntaxDiagram {
+    //input_string: &'a str,
+    input_vectored: Vec<char>,
+    current_char_num: usize
+}
+impl SyntaxDiagram
+{
+    pub fn new(input_string: &str) -> Self {
+
+        let mut v = Vec::new();
+        input_string.chars().for_each(|c| { v.push(c); });
+
+        Self {
+            input_vectored: v,
+            current_char_num: 0
+        }
+    }
+    pub fn curch(&self) -> char {
+        self.input_vectored[self.current_char_num]
+    }
+    pub fn next(&mut self) -> bool {
+        self.current_char_num = self.current_char_num + 1;
+
+        if self.current_char_num >= self.input_vectored.len() {
+            return false;
+        }
+
+        true
+    }
+    pub fn is_in(&mut self, symbols: &[char]) -> bool {
+        symbols.contains(&self.curch())
+    }
+}
 
 fn main() {
-    let transitions  = 
-    [ 
-        // vertex, symbol, next vertex, is finite
-        // N
-        (0, '+', 1),
-        (0, '-', 1),
-
-        (0, '0', 2),
-        (0, '1', 2),
-        (0, '2', 2),
-        (0, '3', 2),
-        (0, '4', 2),
-        (0, '5', 2),
-        (0, '6', 2),
-        (0, '7', 2),
-        (0, '8', 2),
-        (0, '9', 2),
-
-        // Q1
-        (1, '0', 2),
-        (1, '1', 2),
-        (1, '2', 2),
-        (1, '3', 2),
-        (1, '4', 2),
-        (1, '5', 2),
-        (1, '6', 2),
-        (1, '7', 2),
-        (1, '8', 2),
-        (1, '9', 2),
-
-        // Q2
-        (2, '0', 2),
-        (2, '1', 2),
-        (2, '2', 2),
-        (2, '3', 2),
-        (2, '4', 2),
-        (2, '5', 2),
-        (2, '6', 2),
-        (2, '7', 2),
-        (2, '8', 2),
-        (2, '9', 2),
-    ];
-
-
-    let chain = std::env::args().nth(1).unwrap_or_else(|| {
+    let input: String = std::env::args().nth(1).unwrap_or_else(|| {
         eprintln!("Argument error: No input string");
         std::process::exit(1);
     });
 
+    let mut diag = SyntaxDiagram::new(input.as_str());
 
-    let mut stepper = DFA::new(&transitions, &[false, false, true]).unwrap();
-
-    for ch in chain.chars() {
-        if stepper.step(ch) == false {
-            eprintln!("Compilation error: Syntax error");
-            std::process::exit(2);
-        }
+    if diag.is_in(&['+', '-']) {
+        diag.next();
     }
-    if stepper.is_complete() {
-        std::process::exit(0);
+    
+    if diag.is_in(&DIGITS) {
+        diag.next();
     }
     else {
-        eprintln!("Compilation error: Unexpected end of input string");
-        std::process::exit(3);
+        eprintln!("Error");
     }
 
+    while diag.is_in(&DIGITS) {
+        diag.next();
+    }
+
+    if diag.next() == true
+    {
+        eprintln!("Error EOT");
+    }
+    
 }
